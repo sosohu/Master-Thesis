@@ -1,0 +1,7 @@
+*.*
+!*.tex
+!*.eps
+!*.sh
+!*.mk
+!*.py
+!.gitignore
