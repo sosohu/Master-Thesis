@@ -1,0 +1,111 @@
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End: 
+
+\chapter{OpenGL历史版本变更表 }
+%\footnote{摘自OpenGL-维基百科}
+\label{cha:OpenGL-History-Version}
+
+%跨页表格
+\begin{center} \tablecaption{OpenGL版本变更表 \label{tab:OpenGL-Version-History}} 
+\tablefirsthead{
+\rowcolor[gray]{0.8}
+\multicolumn{1}{l}{\textbf{主要版本}} &
+\multicolumn{1}{l}{\textbf{发布日期}} &
+\multicolumn{1}{c}{\textbf{重要变更}} \\ }
+\tablehead{\multicolumn{3}{c}{
+\small 表 \ref{tab:OpenGL-Version-History} (续) } \\
+\rowcolor[gray]{0.8}
+\multicolumn{1}{l}{\textbf{主要版本}} &
+\multicolumn{1}{l}{\textbf{发布日期}} &
+\multicolumn{1}{c}{\textbf{重要变更}} \\ }
+\tabletail{\bottomrule
+\multicolumn{3}{c}{\small 接下页} \\}
+\tablelasttail{\bottomrule}
+
+\begin{supertabular}{p{2.cm}p{2.cm}p{11.cm}}
+      1.1 & 1997.1 & \\
+      1.2 & 1998.3 & \\
+      1.2.1 & 1998.10 & \\
+      1.3 & 2001.8 & \\
+      1.4 & 2002.7 & \\
+      1.5 & 2003.7 & \\
+      2.0 & 2004.9 & \\
+      2.1 & 2006.7 & \\
+      3.0 & 2008.8 & \\
+      3.1 & 2009.3 & \\
+      3.2 & 2009.8 & \\
+      3.3 & 2010.3 & \\
+      4.0 & 2010.3 & \\
+      4.1 & 2010.7 & \\
+      4.2 & 2011.8 & 
+支持的显卡： \\
+& & Nvidia GeForce 400 series, Nvidia GeForce 500 series, Nvidia GeForce 600 series, ATI Radeon HD 5000 series, AMD Radeon HD 6000 Series, AMD Radeon HD 7000 Series \\
+& & \tabitem 支持Shaders原子计数器和加载、存储、原子读-修改-写操作的单级纹理着色器。\\
+& & \tabitem捕捉GPU-tessellated几何变换反馈的结果绘制的多个实例，使复杂的对象进行有效的重新定位和复制。\\
+& & \tabitem支持修改任意子集的压缩纹理，而无需重新下载整个GPU的纹理，显著的性能改进。\\
+& & \tabitem支持包装成一个单一的32位值显著降低内存存储和带宽的高效着色处理多个8位和16位值。\\
+    %\toprule[1.5pt] 
+      4.3 & 2012.8 & 支持的显卡: \\
+& & NVIDIA GeForce400系列，NVIDIA GeForce500系列，NVIDIA GeForce600系列，NVIDIA GeForce700系列，ATI Radeon HD 5000系列，AMD Radeon HD6000系列，AMD Radeon HD7000系列，AMD Radeon HD8000系列 \\
+& & \tabitem 围内充分利用GPU的并发计算着色器的图形管道 \\
+& & \tabitem 暗器的存储缓冲器对象 \\
+& & \tabitem 纹理参数查询 \\
+& & \tabitem 作为标准功能的高质量的纹理压缩ETC2/EAC \\
+& & \tabitem 完全兼容的OpenGL ES3.0的API \\
+& & \tabitem 在应用程序开发过程中调试能力接收调试消息 \\
+& & \tabitem 没有数据复制以不同的方式解释纹理的纹理意见 \\
+& & \tabitem 增加了内存的安全性 \\
+& & \tabitem 一个多应用的健壮性扩展 \\
+      4.4 & 2013.7 & 支持的显卡: \\
+& & DIA GeForce 400系列、NVIDIA GeForce 500系列、NVIDIA GeForce 600系列、NVIDIA GeForce 700系列，ATI Radeon HD 5000系列、AMD Radeon HD6000系列、AMD Radeon HD7000系列、AMD Radeon R9/R7 200系列 \\
+& & \tabitem 缓冲器位置控制 \\
+& & \tabitem 高效异步查询 \\
+& & \tabitem 着色器可变布局 \\
+& & \tabitem 高效多对象绑定 \\
+& & \tabitem 精简化Direct3D应用的移植 \\
+& & \tabitem 非绑定的纹理扩展 \\
+& & \tabitem 稀疏纹理扩展 \\
+      4.5 & 2014.8 & \\
+\end{supertabular}
+\end{center}
+
+\chapter{Mesa3D历史版本变更表}
+\label{cha:Mesa3D-History-Version}
+
+\begin{center} \tablecaption{Mesa3D版本变更表(4.0之前版本不再支持) \label{tab:Mesa3D-Version-History}} 
+\tablefirsthead{
+\rowcolor[gray]{0.8}
+\multicolumn{1}{l}{\textbf{主要版本}} &
+\multicolumn{1}{l}{\textbf{发布日期}} &
+\multicolumn{1}{c}{\textbf{支持OpenGL版本}} \\ }
+\tablehead{\multicolumn{3}{c}{
+\small 表 \ref{tab:OpenGL-Version-History} (续) } \\
+\rowcolor[gray]{0.8}
+\multicolumn{1}{l}{\textbf{主要版本}} &
+\multicolumn{1}{l}{\textbf{发布日期}} &
+\multicolumn{1}{c}{\textbf{支持OpenGL版本}} \\ }
+\tabletail{\bottomrule
+\multicolumn{3}{c}{\small 接下页} \\}
+\tablelasttail{\bottomrule}
+
+\begin{supertabular}{p{2.cm}p{2.cm}m{11.cm}}
+      11.2 & 2016.3 & 4.2(Intel 3.3)\\
+      11.1 & 2015.12 & 4.2(Intel 3.3)\\
+      11.0 & 2015.9 & 4.2(Intel 3.3)\\
+      10.6 & 2015.6 & 3.3\\
+      10.5 & 2015.3 & 3.3\\
+      10.4 & 2014.12 & 3.3\\
+      10.3 & 2014.9 & 3.3\\
+      10.2 & 2014.6 & 3.3\\
+      10.1 & 2014.3 & 3.3\\
+      10.0 & 2013.11 & 3.3\\
+      9.0 & 2012.10 & 3.1\\
+      8.0 & 2012.2 & 3.0\\
+      7.0 & 2007.6 & 2.1\\
+      6.0 & 2004.1 & 1.5\\
+      5.0 & 2002.11 & 1.4\\
+      4.0 & 2001.10 & 1.3\\
+\end{supertabular}
+\end{center}
