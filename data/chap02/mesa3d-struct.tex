@@ -31,8 +31,12 @@ Gallium3D实现模块，用来实现跨图形硬件的渲染技术。
 \begin{figure}[H] 
   \centering
   \includegraphics[width=10cm,height=5cm]{figures/chap02/Gallium3D}
-  \caption{Mesa3D 模型结构}
+  \caption{Mesa3D的Gallium3D模型结构}
   \label{fig:Gallium3D}
 \end{figure}
 
-由于Gallium3D不仅支持OpenGL也支持Direct3D等API,所以Gallium3D先是通过其内部的State Tracker模块将Mesa3D主模块的API转化为统一的State Tracker接口,然后接着根据图形硬件信息交给对应图形硬件设备驱动处理，最后调用硬件设备进行硬件加速。
+由于Gallium3D不仅支持OpenGL也支持Direct3D等API,所以Gallium3D先是通过其内部的State Tracker模块将Mesa3D主模块的API转化为统一的State Tracker接口,然后接着根据图形硬件信息交给对应图形硬件设备驱动处理，最后通过WinSys跨越不同操作系统来调用硬件设备进行硬件加速。
+
+因为Gallium3D还要求图形硬件对着色器的支持，所以一些老式的显卡例如ATI r100-r200就无法使用Gallium3D实现，所以Mesa3D单独为它们实现了一套直接渲染框架(DRI2)。
+
+
