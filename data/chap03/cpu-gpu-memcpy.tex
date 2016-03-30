@@ -90,5 +90,82 @@
 
 \textbf{龙芯扩展宽位访存指令}: 龙芯平台为了自身发展的需求，通过龙芯指令系统融合技术\cite{loongson-merge},专门开发了一些宽位访存指令，诸如本文使用到的128bit浮点访存指令GSLQC1和GSSQC1可以实现128bit的浮点数据存取。
 
+由于我们的宽位访存指令GSLQC1和GSSQC1必须要按照要求先进行128位对齐后使用，所以我们在优化CPU端与GPU端的单精度浮点数据拷贝时候，则必须要考虑到拷贝源地址和目的地址的对齐情况，为了更简明的说明这个问题，我们可以通过下图\ref{fig:memcpy}来看宽位访存指令实现拷贝效率优化的整个过程。
 
+\begin{figure}[H] 
+  \centering
+  \includegraphics[width=16cm,height=9cm]{figures/chap03/memcpy}
+  \caption{宽位访存指令实现拷贝效率优化}
+  \label{fig:memcpy}
+\end{figure}
+
+这里介绍一下流程图\ref{fig:memcpy}里面的过程A、过程B和过程C的具体工作:
+
+\begin{itemize}
+
+\item{\textbf{过程A}}: 直接调用glibc系统库的memcpy函数。
+\item{\textbf{过程B}}: \\
+因为这种情况下源地址src和目的地址dst都是128bit对齐的，所以只需要直接的使用宽位访存指令取数和存数即可。具体实现伪代码如下：
+
+\begin{algorithm}
+	\caption{过程B算法}
+	\begin{algorithmic}[1] %每行显示行号
+		\Require $dst$目的地址，$src$源地址, $size$大小
+		%\Ensure 
+		\Function {memcpy}{$dst, src, size$}
+			\State $gpr0 \gets src$
+			\State $gpr1 \gets dst$
+			\State $off \gets 0$
+			\While {$off + 16 < size$}
+				\State $gslqc1\, fpr0,\, fpr1,\, off(gpr0)$
+				\State $gssqc1\, fpr0,\, fpr1,\, off(gpr1)$
+				\State $off \gets off + 16$
+			\EndWhile
+		\EndFunction
+		\State
+	\end{algorithmic}
+\end{algorithm}
+
+\item{\textbf{过程C}}: \\
+由于在源地址src对齐后，目的地址dst不是128bit对齐的，所以这里目的地址dst与128bit对齐地址的差可能会是32bit、64bit和96bit这三种，然后无论哪一种都需要我们进行人工的暂存和拼接组装，该过程的算法实现伪代码如下:
+
+\begin{algorithm}
+	\caption{过程C算法}
+	\begin{algorithmic}[1] %每行显示行号
+		\Require $dst$目的地址，$src$源地址, $size$大小
+		%\Ensure 
+		\Function {memcpy}{$dst, src, size$}
+			\State $array pre[0:3] \gets \{0.0f, 0.0f, 0.0f, 0.0f\}$
+			\State $array cur[0:3] \gets \{0.0f, 0.0f, 0.0f, 0.0f\}$
+			\State $offbit \gets (dst \% 16) * 8$
+			\State $n \gets offbit/32 - 1$
+			\State $pre[0:n] \gets src[0:n]$
+			\State $off \gets 16$
+			\State $gpr0 \gets src + off$
+			\State $gpr1 \gets dst + off - offbit/8$
+			\While {$off + 16 < size$}
+				\State $gslqc1\, fpr0, fpr1, off(gpr0)$
+				\State $cur[n+1:3]  \gets \{fpr0, fpr1\}\, low\, 128-offbit\, bit$
+				\State $cur[0:n] \gets pre[0:n]$
+				\State $pre[0:n] \gets \{fpr0, fpr1\}\, high\, offbit\, bit$
+				\State ${fpr0, fpr1} \gets cur[0:3]$
+				\State $gssqc1\, fpr0,\, fpr1,\, off(gpr1)$
+				\State $off \gets off + 16$
+			\EndWhile
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
+这里以目的地址dst与128bit对齐地址偏移32bit为例来解释上述过程C算法。如下图\ref{fig:offset32}所示，我们需要将src开始的源数据搬运到dst开始的目的位置，此时src已经是128bit对齐，而dst与128bit对齐相差32bit,这时我们将s4位置的32bit数据暂存起来，接着采用宽位访存指令读取src下一个128bit数据，即\{s5,s6,s7,s8\},接着我们将s4,s5,s6,s7拼装起来成128bit采用宽位访存指令存储到dst的下一个128bit对齐位置，即{d4,d5,d6,d7}。以此规律循环处理即可完成非对齐情况下的数据拷贝。
+
+
+\begin{figure}[H] 
+  \centering
+  \includegraphics[width=12cm,height=8cm]{figures/chap03/offset32}
+  \caption{32bit偏移下过程C算法举例}
+  \label{fig:offset32}
+\end{figure}
+
+
+\end{itemize}
 
