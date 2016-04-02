@@ -44,6 +44,102 @@ Radeon显卡提供驱动使用命令流(Command Stream)的形式进行对显卡�
   \label{fig:CommandBuffer}
 \end{figure}
 
+上面提到的Radeon显卡命令是以命令包的形式出现的，如今Radeon系列显卡有4中命令包，分别是0型、1型、2型和3型命令包，命令包由两部分组成，第一部分是命令包头，第二部分是命令包主体，命令包头为请求GPU执行的具体操作，命令主体为执行该操作需要的数据。
+
+下面分别介绍一下这四种命令包\cite{Radeon-Manual}:
+
+\begin{itemize}
+
+\item{\textbf{0型命令包}} \\
+0型命令包用于写连续N个寄存器。包主体部分是依次往这些寄存器写的值。包头各个部分的意义为：
+
+\begin{center} \tablecaption{0型命令包 \label{tab:0-command}} 
+\tablefirsthead{
+\rowcolor[gray]{0.8}
+\multicolumn{1}{l}{\textbf{位}} &
+\multicolumn{1}{l}{\textbf{域名称}} &
+\multicolumn{1}{c}{\textbf{描述}} \\ }
+\tablehead{\multicolumn{3}{c}{
+\small 表 \ref{tab:0-command} (续) } \\
+\rowcolor[gray]{0.8}
+\multicolumn{1}{l}{\textbf{位}} &
+\multicolumn{1}{l}{\textbf{域名称}} &
+\multicolumn{1}{c}{\textbf{描述}} \\ }
+\tabletail{\bottomrule
+\multicolumn{3}{c}{\small 接下页} \\}
+\tablelasttail{\bottomrule}
+
+\begin{supertabular}{p{2.cm}p{3.cm}m{10.cm}}
+	12:0 & BASE\underline{ }INDEX & 要写的连续寄存器的第一个寄存器地址，最大地址0x7FFF \\
+	14:13 & 保留位 & \\
+	15 & ONE\underline{ }REG\underline{ }WR &  \\ 
+	& & \tabitem 0表示将包主体的数据依次写入寄存器中 \\
+	& & \tabitem 1表示所有数据写入同一个寄存器 \\
+	29:16 & COUNT & 要写的寄存器数目N-1 \\
+	31:30 & TYPE & 包类型，0型命令包类型名为0 \\
+\end{supertabular}
+\end{center}
+ 
+
+\item{\textbf{1型命令包}} \\
+1型命令包用于写两个的寄存器，1型命令包包头定义如下：
+
+\begin{center} \tablecaption{1型命令包 \label{tab:1-command}} 
+\tablefirsthead{
+\rowcolor[gray]{0.8}
+\multicolumn{1}{l}{\textbf{位}} &
+\multicolumn{1}{l}{\textbf{域名称}} &
+\multicolumn{1}{c}{\textbf{描述}} \\ }
+\tablehead{\multicolumn{3}{c}{
+\small 表 \ref{tab:1-command} (续) } \\
+\rowcolor[gray]{0.8}
+\multicolumn{1}{l}{\textbf{位}} &
+\multicolumn{1}{l}{\textbf{域名称}} &
+\multicolumn{1}{c}{\textbf{描述}} \\ }
+\tabletail{\bottomrule
+\multicolumn{3}{c}{\small 接下页} \\}
+\tablelasttail{\bottomrule}
+
+\begin{supertabular}{p{2.cm}p{3.cm}m{10.cm}}
+	10:0 & REG\underline{ }INDEX1 & 第一个寄存器的地址 \\
+	22:11 & REG\underline{ }INDEX2 & 第二个寄存器的地址 \\
+	29:22 & RESERVED & 保留位 \\
+	31:30 & TYPE & 1型命令包的类型为0x1 \\
+\end{supertabular}
+\end{center}
+
+\item{\textbf{2型命令包}} \\
+2型命令包是一个空命令包，用于填充对齐命令。2型命令包没有包主体，其包头最高两位为0x2，其它位无意义。
+
+\item{\textbf{3型命令包}} \\
+3型命令包是最功能最丰富的包，图形的主要功能都是通过这类包实现的。3型命令包主体内容由包头的IT\underline{ }OPCODE决定。3型命令是主要的命令包，涵盖了寄存器设置/绘图命令/同步等主要操作。3型命令包包头定义如下:
+
+\begin{center} \tablecaption{3型命令包 \label{tab:3-command}} 
+\tablefirsthead{
+\rowcolor[gray]{0.8}
+\multicolumn{1}{l}{\textbf{位}} &
+\multicolumn{1}{l}{\textbf{域名称}} &
+\multicolumn{1}{c}{\textbf{描述}} \\ }
+\tablehead{\multicolumn{3}{c}{
+\small 表 \ref{tab:3-command} (续) } \\
+\rowcolor[gray]{0.8}
+\multicolumn{1}{l}{\textbf{位}} &
+\multicolumn{1}{l}{\textbf{域名称}} &
+\multicolumn{1}{c}{\textbf{描述}} \\ }
+\tabletail{\bottomrule
+\multicolumn{3}{c}{\small 接下页} \\}
+\tablelasttail{\bottomrule}
+
+\begin{supertabular}{p{2.cm}p{3.cm}m{10.cm}}
+	7:0 & reserved & 保留位 \\
+	15:8 & IT\underline{ }OPCODE & 操作码 \\
+	29:16 & COUNT & 包主题DWORDS数目-1 \\
+	31:30 & TYPE & 3型包类型为0x3 \\
+\end{supertabular}
+\end{center}
+
+\end{itemize}
+
 \subsubsection{Radeon显卡3D图形渲染管线}
 
 Radeon系列显卡通过内置的3D图形流水线帮助实现图形渲染的硬件加速，这里以Radeon R600显卡为例介绍其内部的图形流水线结构。

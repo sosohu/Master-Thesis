@@ -84,13 +84,13 @@
 
 通过上图\ref{fig:mesa3d-data-transfer-gtt}可以看到XXXX
 
-\subsubsection{CPU与GPU拷贝效率的优化}
+\subsubsection{CPU拷贝效率的优化}
 
-在前一节的改进访存策略之后，我们可以通过提高拷贝效率来改进CPU与GPU的数据传输性能。由于CPU端向GTT的数据拷贝大多都是单精度浮点数据的拷贝，所以我们可以通过龙芯平台特有的宽位访存指令来提高拷贝效率。
+在前一节的改进访存策略之后，我们可以通过提高拷贝效率来改进CPU的数据传输性能。由于CPU端向GTT的数据拷贝大多都是单精度浮点数据的拷贝，所以我们可以通过龙芯平台特有的宽位访存指令来提高拷贝效率。
 
 \textbf{龙芯扩展宽位访存指令}: 龙芯平台为了自身发展的需求，通过龙芯指令系统融合技术\cite{loongson-merge},专门开发了一些宽位访存指令，诸如本文使用到的128bit浮点访存指令GSLQC1和GSSQC1可以实现128bit的浮点数据存取。
 
-由于我们的宽位访存指令GSLQC1和GSSQC1必须要按照要求先进行128位对齐后使用，所以我们在优化CPU端与GPU端的单精度浮点数据拷贝时候，则必须要考虑到拷贝源地址和目的地址的对齐情况，为了更简明的说明这个问题，我们可以通过下图\ref{fig:memcpy}来看宽位访存指令实现拷贝效率优化的整个过程。
+由于我们的宽位访存指令GSLQC1和GSSQC1必须要按照要求先进行128位对齐后使用，所以我们在优化CPU的单精度浮点数据拷贝时候，则必须要考虑到拷贝源地址和目的地址的对齐情况，为了更简明的说明这个问题，我们可以通过下图\ref{fig:memcpy}来看宽位访存指令实现拷贝效率优化的整个过程。
 
 \begin{figure}[H] 
   \centering
@@ -166,6 +166,18 @@
   \label{fig:offset32}
 \end{figure}
 
+\subsubsection{GPU拷贝效率的优化}
+
+前面提到的CPU与GPU拷贝策略的优化是把数据放在GTT,然后让GPU来GTT访问数据，这样可能会加大GPU的负载，所以这里采用张凯的论文$<<$显存与内存间的数据传输通路优化$>>$\cite{gpu-cpu-data}里面提到采用GTT+DMA的这种非线性的优化方法，使用这种方法的原理就是GPU采用DMA的方式在不占用CPU的执行周期的情况下将GTT里面的内容快速的拷贝到显存中，这样GPU之后的访存时间就会减少，总体上减小了GPU的工作负载。
+
+\begin{figure}[H] 
+  \centering
+  \includegraphics[width=12cm,height=8cm]{figures/chap03/gpu-dma}
+  \caption{DMA方式下的Mesa3D库CPU与GPU访存策略}
+  \label{fig:gpu-dma}
+\end{figure}
+
+改进的传输模式如图\ref{fig:gpu-dma}，对比之前的实现(图\ref{fig:vbo-gtt})，虽然设计上更加复杂了一些,但是在龙芯平台上,PCI-E总线带宽较小,直接读写的速度非常慢, 这会导致即使在小数据量时直接读写的效率也比DMA方式的效率更低。
 
 \end{itemize}
 
