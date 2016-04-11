@@ -4,16 +4,11 @@
 \section{Mesa3D的CPU与GPU负载平衡的优化}
 \input{data/chap03/cpu-gpu-balance}
 
-\newpage
 \section{Mesa3D的内存到显存的数据传输的优化}
 \input{data/chap03/cpu-gpu-memcpy}
 
 \section{Mesa3D的CPU端计算优化}
-
-\subsection{研究背景}
-
-\subsection{CPU端计算热点}
-
-\subsection{CPU端优化技术}
+\input{data/chap03/cpu-opt}
 
 \section{本章小结}
+本章分三个部分分别阐述龙芯平台Mesa3D图形库的优化方法。首先从CPU与GPU的负载均衡的角度上展开程序分析并提出优化策略，以实现CPU和GPU的负载均衡。接着从CPU与GPU的数据传输角度来分析Mesa3D的性能瓶颈，仔细分析了现有Mesa3D内存到显存的传输策略后，采用一种改进的传输优化策略。最后介绍了CPU端计算热点的一些优化手段。

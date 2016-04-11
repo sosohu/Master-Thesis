@@ -8,7 +8,7 @@
 
 \begin{figure}[H] 
   \centering
-  \includegraphics[width=10cm,height=6cm]{figures/chap02/Loongson3-System-Struct}
+  \includegraphics[width=12cm,height=7cm]{figures/chap02/Loongson3-System-Struct}
   \caption{龙芯３号系统结构}
   \label{fig:Loongson3-System-Struct}
 \end{figure}
@@ -19,7 +19,7 @@
 
 \begin{figure}[H] 
   \centering
-  \includegraphics[width=10cm,height=6cm]{figures/chap02/Loongson3-Node-Struct}
+  \includegraphics[width=10cm,height=7cm]{figures/chap02/Loongson3-Node-Struct}
   \caption{龙芯３号节点结构}
   \label{fig:Loongson3-Node-Struct}
 \end{figure}
@@ -30,125 +30,49 @@ X2交叉开关通过四个Master端口连接四个二级Cache块,至少一个Sla
 
 在龙芯3号的互连系统只是定义上层协议,会不对传输协议的实现做具体规定,因此,结点之间的互连即可以采用片上网络进行实现,也可以通过I/O控制链路实现多芯片的互连。在一个4结点16核系统为例,既可以通过4片4核芯片组成,也可以通过2片8核芯片,或基于一个单芯片4节点16核芯片组成。由于互连系统的物理实现对软件透明,上述3种配置的系统可以运行相同的操作a系统进行。
 
-\subsection{龙芯3号平台Radeon显卡介绍}
+\subsection{龙芯3号平台Radeon R600系列显卡}
 
-在龙芯3号系列处理是平台上常用到的显卡设备就是Radeon系列显卡，本文的Mesa3D硬件加速相关的优化都是基于Radeon系列显卡实现的，所以这里对该系列显卡做简单的介绍。
+在龙芯3号系列处理是平台上常用到的显卡设备就是Radeon R600系列的显卡，所以这里对该显卡做简单的介绍。
 
-\subsubsection{Radeon显卡命令处理机制}
-Radeon显卡提供驱动使用命令流(Command Stream)的形式进行对显卡编程：驱动程序将需要对显卡进行配置的一连串命令写入命令缓冲区，写完之后进入让出处理器，显卡按照命令写入的顺序执行这些命令，执行完成后触发中断通知驱动。具体来说就是CPU将这些命令放入一个称为命令环的环形缓冲区中，命令环是GTT内存中分出来的一片内存，驱动程序往命令环中填充命令，填充完后通知GPU已经写入命令，接着GPU的命令处理器CP(Command Processor)接收并解析驱动程序发送过来的命令流，将解析后的数据传输给图形控制器的其他模块，包括3D图形处理器、2D图形处理器、视频处理器。
+\subsubsection{Radeon R600系列显卡基本介绍}
 
-\begin{figure}[H] 
-  \centering
-  \includegraphics[width=10cm,height=6cm]{figures/chap02/CommandBuffer}
-  \caption{Radeon显卡命令处理机制}
-  \label{fig:CommandBuffer}
-\end{figure}
-
-上面提到的Radeon显卡命令是以命令包的形式出现的，如今Radeon系列显卡有4中命令包，分别是0型、1型、2型和3型命令包，命令包由两部分组成，第一部分是命令包头，第二部分是命令包主体，命令包头为请求GPU执行的具体操作，命令主体为执行该操作需要的数据。
-
-下面分别介绍一下这四种命令包\cite{Radeon-Manual}:
+Radeon R600显卡是AMD-ATI公司开发的一个显示核心产品线，系列首张显卡HD 2900XT于2007年5月14日发表。R600系列显卡在老一代的R500系列显卡的基础上发生了很大的变化，不再包含2D加速部件，所有的加速都使用3D部件完成，使用Shader Model 4.0,　使用超标量统一着色器架构(Unified shader)。具体的新技术特征如下:
 
 \begin{itemize}
 
-\item{\textbf{0型命令包}} \\
-0型命令包用于写连续N个寄存器。包主体部分是依次往这些寄存器写的值。包头各个部分的意义为：
-
-\begin{center} \tablecaption{0型命令包 \label{tab:0-command}} 
-\tablefirsthead{
-\rowcolor[gray]{0.8}
-\multicolumn{1}{l}{\textbf{位}} &
-\multicolumn{1}{l}{\textbf{域名称}} &
-\multicolumn{1}{c}{\textbf{描述}} \\ }
-\tablehead{\multicolumn{3}{c}{
-\small 表 \ref{tab:0-command} (续) } \\
-\rowcolor[gray]{0.8}
-\multicolumn{1}{l}{\textbf{位}} &
-\multicolumn{1}{l}{\textbf{域名称}} &
-\multicolumn{1}{c}{\textbf{描述}} \\ }
-\tabletail{\bottomrule
-\multicolumn{3}{c}{\small 接下页} \\}
-\tablelasttail{\bottomrule}
-
-\begin{supertabular}{p{2.cm}p{3.cm}m{10.cm}}
-	12:0 & BASE\underline{ }INDEX & 要写的连续寄存器的第一个寄存器地址，最大地址0x7FFF \\
-	14:13 & 保留位 & \\
-	15 & ONE\underline{ }REG\underline{ }WR &  \\ 
-	& & \tabitem 0表示将包主体的数据依次写入寄存器中 \\
-	& & \tabitem 1表示所有数据写入同一个寄存器 \\
-	29:16 & COUNT & 要写的寄存器数目N-1 \\
-	31:30 & TYPE & 包类型，0型命令包类型名为0 \\
-\end{supertabular}
-\end{center}
- 
-
-\item{\textbf{1型命令包}} \\
-1型命令包用于写两个的寄存器，1型命令包包头定义如下：
-
-\begin{center} \tablecaption{1型命令包 \label{tab:1-command}} 
-\tablefirsthead{
-\rowcolor[gray]{0.8}
-\multicolumn{1}{l}{\textbf{位}} &
-\multicolumn{1}{l}{\textbf{域名称}} &
-\multicolumn{1}{c}{\textbf{描述}} \\ }
-\tablehead{\multicolumn{3}{c}{
-\small 表 \ref{tab:1-command} (续) } \\
-\rowcolor[gray]{0.8}
-\multicolumn{1}{l}{\textbf{位}} &
-\multicolumn{1}{l}{\textbf{域名称}} &
-\multicolumn{1}{c}{\textbf{描述}} \\ }
-\tabletail{\bottomrule
-\multicolumn{3}{c}{\small 接下页} \\}
-\tablelasttail{\bottomrule}
-
-\begin{supertabular}{p{2.cm}p{3.cm}m{10.cm}}
-	10:0 & REG\underline{ }INDEX1 & 第一个寄存器的地址 \\
-	22:11 & REG\underline{ }INDEX2 & 第二个寄存器的地址 \\
-	29:22 & RESERVED & 保留位 \\
-	31:30 & TYPE & 1型命令包的类型为0x1 \\
-\end{supertabular}
-\end{center}
-
-\item{\textbf{2型命令包}} \\
-2型命令包是一个空命令包，用于填充对齐命令。2型命令包没有包主体，其包头最高两位为0x2，其它位无意义。
-
-\item{\textbf{3型命令包}} \\
-3型命令包是最功能最丰富的包，图形的主要功能都是通过这类包实现的。3型命令包主体内容由包头的IT\underline{ }OPCODE决定。3型命令是主要的命令包，涵盖了寄存器设置/绘图命令/同步等主要操作。3型命令包包头定义如下:
-
-\begin{center} \tablecaption{3型命令包 \label{tab:3-command}} 
-\tablefirsthead{
-\rowcolor[gray]{0.8}
-\multicolumn{1}{l}{\textbf{位}} &
-\multicolumn{1}{l}{\textbf{域名称}} &
-\multicolumn{1}{c}{\textbf{描述}} \\ }
-\tablehead{\multicolumn{3}{c}{
-\small 表 \ref{tab:3-command} (续) } \\
-\rowcolor[gray]{0.8}
-\multicolumn{1}{l}{\textbf{位}} &
-\multicolumn{1}{l}{\textbf{域名称}} &
-\multicolumn{1}{c}{\textbf{描述}} \\ }
-\tabletail{\bottomrule
-\multicolumn{3}{c}{\small 接下页} \\}
-\tablelasttail{\bottomrule}
-
-\begin{supertabular}{p{2.cm}p{3.cm}m{10.cm}}
-	7:0 & reserved & 保留位 \\
-	15:8 & IT\underline{ }OPCODE & 操作码 \\
-	29:16 & COUNT & 包主题DWORDS数目-1 \\
-	31:30 & TYPE & 3型包类型为0x3 \\
-\end{supertabular}
-\end{center}
+\item{}Shader Model 4.0,统一着色架构的几何和像素支持
+\item{}全速32位浮点处理
+\item{}支持浮点融合，纹理过滤和抗锯齿的HDR渲染
+\item{}高性能动态分支与控制流技术
+\item{}采用先进的缓存系统实现几乎无限的着色指令存储
+\item{}先进的纹理压缩技术
+\item{}新的顶点缓存和顶点预取设计，提高顶点处理的吞吐量
+\item{}实时阴影渲染的Z缓存优化
 
 \end{itemize}
 
-\subsubsection{Radeon显卡3D图形渲染管线}
+\subsubsection{Radeon R600系列显卡3D图形渲染管线}
 
-Radeon系列显卡通过内置的3D图形流水线帮助实现图形渲染的硬件加速，这里以Radeon R600显卡为例介绍其内部的图形流水线结构。
+Radeon系列显卡通过内置的3D图形流水线帮助实现图形渲染的硬件加速，这里以Radeon R600显卡为例介绍其内部的图形流水线结构。R600显卡内部图形流水线主要有以下几个阶段:
+
+\begin{itemize}
+\item{\textbf{命令处理}}: \\
+命令处理器(CP)需要处理环形缓冲区的命令流。在3D渲染管线里面，命令处理器处理这些命令流的时候通常会产生一系列的写寄存器活动。驱动设置好index buffer(GTT内存)并将index buffer告知硬件，被命令触发后，顶点组装和细分器（vertex grouper and tesselator, VGT）根据index buffer的地址将索引数据DMA到SPI(shader pipe interpolator）上，同时将图元的连接信息发送给图元组装器（primitive assembly）。
+\item{\textbf{顶点处理}}: \\
+所有的着色处理(shader processing)都是在统一着色器块(unified shader block)中进行的，统一着色器块包含Sequencer(SQ，控制shader运行)和Shader pipe(SP)模块，每一个shader程序都能够访问一些通用寄存器，这些通用寄存器是在shader程序运行之前由SPI动态分配的，SPI会往这些寄存器中加载合适的参数，这些参数包括顶点数据的基地址。然后SPI会为SQ启动程序执行过程，shader程序需要做的第一件事情就是取顶点数据，然后针对这个顶点运行shader程序，顶点处理shader的输出被放置到着色器输出缓存(shader export，SX)中\cite{R600-ISA}。
+\item{\textbf{片段处理}}: \\
+顶点处理完成后，顶点数据被发送到图元组装器(PA)中进行图元组装，PA的输出被发送给扫描转换器(scan convert，SC)进行扫描转换(光栅化过程，差值计算)，SC会检查深度缓存(Depth buffer，DB)确定片段的可用性，这个检查过程会进行Early Z、Re-Z和HiZ处理。光栅化出来的片段被发送给SPI，再进入到shader core里面进行最后的片段处理。片段处理器会进行取纹理、ALU计算以及内存读写操作。完成后，片段的几何信息(在屏幕坐标系中的坐标以及深度值)和颜色信息通过SX发送到DB和CB中进行最后的处理。
+\item{\textbf{最后渲染}}: \\
+Pixel shader的输出被放到DB和CB中进行最后的处理，这部分处理包括alpha测试、深度测试和最后的融合(blending)。
+\end{itemize}
+
+具体结构图如下图\ref{fig:R600-Pipeline}:
 
 \begin{figure}[H] 
   \centering
-  \includegraphics[width=9cm,height=10cm]{figures/chap02/R600-Pipeline}
+  \includegraphics[width=13cm,height=15cm]{figures/chap02/R600-Pipeline}
   \caption{R600图形渲染管线}
   \label{fig:R600-Pipeline}
 \end{figure}
 
-如图\ref{fig:R600-Pipeline}所示，输入数据大体上按照“顶点处理”、“图元组装”、“光栅化”、“片段处理”、“输出”的过程流经图形硬件。这些阶段几乎完全覆盖了前面图\ref{fig:OpenGL-Pipeline}里面的渲染过程，更加详细信息可查阅参考文献Radeon R6xx/R7xx Acceleration\cite{Radeon-Manual}。
+总体上来说，输入数据大体上按照“顶点处理”、“图元组装”、“光栅化”、“片段处理”、“输出”的过程流经图形硬件。这些阶段几乎完全覆盖了前面图\ref{fig:OpenGL-Pipeline}里面的渲染过程，更加详细信息可查阅参考文献Radeon R6xx/R7xx Acceleration\cite{Radeon-Manual}。

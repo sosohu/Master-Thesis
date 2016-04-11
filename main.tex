@@ -28,13 +28,33 @@
 
 %伪代码
 \usepackage{algorithm}
-\usepackage{algorithmicx}
-\usepackage{algpseudocode}
+\usepackage{algpseudocode,float}
 \usepackage{amsmath}
 
 \floatname{algorithm}{算法}
 \renewcommand{\algorithmicrequire}{\textbf{输入:}}
 \renewcommand{\algorithmicensure}{\textbf{输出:}}
+
+\makeatletter
+\newenvironment{breakablealgorithm}
+  {% \begin{breakablealgorithm}
+   \begin{center}
+     \refstepcounter{algorithm}% New algorithm
+     \hrule height.8pt depth0pt \kern2pt% \@fs@pre for \@fs@ruled
+     \renewcommand{\caption}[2][\relax]{% Make a new \caption
+       {\raggedright\textbf{\ALG@name~\thealgorithm} ##2\par}%
+       \ifx\relax##1\relax % #1 is \relax
+         \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##2}%
+       \else % #1 is not \relax
+         \addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##1}%
+       \fi
+       \kern2pt\hrule\kern2pt
+     }
+  }{% \end{breakablealgorithm}
+     \kern2pt\hrule\relax% \@fs@post for \@fs@ruled
+   \end{center}
+  }
+\makeatother
 
 %代码
 \usepackage{listings}
@@ -58,6 +78,8 @@
   extendedchars=false %这一条命令可以解决代码跨页时，章节标题，页眉等汉字不显示的问题
 }
 
+% figure left, right
+\usepackage[export]{adjustbox}
 
 % 你可以在这里修改配置文件中的定义，导言区可以使用中文。
 % \def\myname{胡庆海}

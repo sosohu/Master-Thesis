@@ -111,6 +111,51 @@
 \end{center}
 
 
+\chapter{ATTR宏函数}
+%\footnote{摘自OpenGL-维基百科}
+\label{cha:attr}
 
+\begin{lstlisting}
+/**
+ * This macro is used to implement all the glVertex, glColor, glTexCoord,
+ * glVertexAttrib, etc functions.
+ */
+#define ATTR( A, N, T, V0, V1, V2, V3 )					\
+do {									\
+   struct vbo_exec_context *exec = &vbo_context(ctx)->exec;		\
+									\
+   if (unlikely(!(ctx->Driver.NeedFlush & FLUSH_UPDATE_CURRENT)))	\
+      ctx->Driver.BeginVertices( ctx );					\
+   									\
+   if (unlikely(exec->vtx.active_sz[A] != N))				\
+      vbo_exec_fixup_vertex(ctx, A, N);					\
+   									\
+   {									\
+      GLfloat *dest = exec->vtx.attrptr[A];				\
+      if (N>0) dest[0] = V0;						\
+      if (N>1) dest[1] = V1;						\
+      if (N>2) dest[2] = V2;						\
+      if (N>3) dest[3] = V3;						\
+      exec->vtx.attrtype[A] = T;                                        \
+   }									\
+									\
+   if ((A) == 0) {							\
+      /* This is a glVertex call */					\
+      GLuint i;								\
+									\
+      for (i = 0; i < exec->vtx.vertex_size; i++)			\
+	 exec->vtx.buffer_ptr[i] = exec->vtx.vertex[i];			\
+									\
+      exec->vtx.buffer_ptr += exec->vtx.vertex_size;			\    
+									\
+      /* Set FLUSH_STORED_VERTICES to indicate that there's now */	\
+      /* something to draw (not just updating a color or texcoord).*/	\
+      ctx->Driver.NeedFlush |= FLUSH_STORED_VERTICES;			\
+									\
+      if (++exec->vtx.vert_count >= exec->vtx.max_vert)			\
+	 vbo_exec_vtx_wrap( exec );					\
+   }									\
+} while (0)
+\end{lstlisting}
 
 

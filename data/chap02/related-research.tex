@@ -4,7 +4,7 @@
 
 \subsubsection{性能瓶颈模型}
 
-传统的软件优化都是在致力于找到软件程序的热点，即10\%的那部分代码却花费了整个软件执行的90\%的时间，然而如今的图形硬件加速都是将任务分配到渲染管线的一个个阶段中，而且这些阶段都是并行工作的，所以其中的数据流就会造成如图\ref{fig:Bottleneck}所示的瓶颈，试想A模块处理完数据后向B模块传递，然后B开始处理，此时A又可以开始处理新的数据，因为A和B对数据的处理速度不同，加上A到B数据传输也需要花费时间，这样A每次处理完多少数据再传递给B则会大大影响整个工作的完成时间。
+传统的软件优化都是在致力于找到软件程序的热点，即10$\%$的那部分代码却花费了整个软件执行的90$\%$的时间，然而如今的图形硬件加速都是将任务分配到渲染管线的一个个阶段中，而且这些阶段都是并行工作的，所以其中的数据流就会造成如图\ref{fig:Bottleneck-Model}所示的瓶颈，试想A模块处理完数据后向B模块传递，然后B开始处理，此时A又可以开始处理新的数据，因为A和B对数据的处理速度不同，加上A到B数据传输也需要花费时间，这样A每次处理完多少数据再传递给B则会大大影响整个工作的完成时间。
 
 \begin{figure}[H] 
   \centering
@@ -46,19 +46,23 @@
 
 \begin{figure}[H] 
   \centering
-  \includegraphics[width=5cm,height=2.5cm]{figures/chap02/Streaming}
+  \includegraphics[width=12cm,height=7cm]{figures/chap02/Streaming}
   \caption{Streaming举例}
   \label{fig:Streaming}
 \end{figure}
 \item{\textbf{映射内存}} \\
-通常来说GPU与CPU的组合方式分为两种，一种是独立CPU存在的，它们之间通过PCI-E线连接，传输速度较慢；而另外一种则是和CPU融合在一块的集成GPU,这样的GPU使用的内存就是CPU内存分配出去的一部分，所以这里面的拷贝则是CPU内存内部的拷贝，数据传输消耗就大大减少。当然集成GPU在计算性能方面可能不如独立GPU强大,而且这种优化方式实际上是硬件上的更换，可操作性不大。关于这两种GPU的更多比较可以查看参考文献On the Efficacy of a Fused CPU+GPU Processor(or APU) for Parallel Computing\cite{on-the-Efficacy}。
-\\
+通常来说GPU与CPU的组合方式分为两种，一种是独立CPU存在的，它们之间通过PCI-E线连接，传输速度较慢；而另外一种则是和CPU融合在一块的集成GPU,这样的GPU使用的内存就是CPU内存分配出去的一部分，所以这里面的拷贝则是CPU内存内部的拷贝，数据传输消耗就大大减少。
+
 \begin{figure}[H] 
   \centering
-  \includegraphics[width=5cm,height=2.5cm]{figures/chap02/Transfer}
+  \includegraphics[width=12cm,height=6cm]{figures/chap02/Transfer}
   \caption{独立GPU与集成GPU的数据传输方式比较}
   \label{fig:Transfer}
 \end{figure}
+
+当然集成GPU在计算性能方面可能不如独立GPU强大,而且这种优化方式实际上是硬件上的更换，可操作性不大。关于这两种GPU的更多比较可以查看参考文献On the Efficacy of a Fused CPU+GPU Processor(or APU) for Parallel Computing\cite{on-the-Efficacy}。
+
+
 \item{\textbf{CPU/GPU调度的优化}} \\
 这方面的优化简单来说就是重新修改应用程序，使得CPU的任务执行，GPU的任务执行以及CPU到GPU的数据传输之间次序做出一些调整。通过将任务和数据映射成任务数据关系图数学模型，然后再通过设定好最优解目标，使用模拟退火(Simulated Annealing)算法寻找最优任务与数据次序。
 \end{itemize}
@@ -72,6 +76,14 @@
 \begin{itemize}
 \item{} GPU将系统主存地址空间通过GTT的方式映射到显存虚拟地址空间，然后就可以对其进行直接读写，这里面是通过PCI-E总线进行的读写。这种方式的优点就是实现简单，不过因为龙芯平台上PCI-E总线带宽较小，数据传输速率不高。
 \item{} GPU通过DMA的方式将数据从系统主存拷贝到显存。当然，因为GPU并不能访问全部的系统内存，只能访问系统主存的GTT部分内存，所以这就需要先把数据拷贝到GTT中，然后再使用DMA方式进行数据的高速传输。这种方式实现比较复杂，不过传输效率较高。
-
-通常来说，GPU对上面的两种方式都是支持的，而且在诸如X86平台上进行小数据的读写时候会采用第一种方式，因为DMA的方式需要一些额外的开销，更加适合大数据的传输。在龙芯平台上，由于PCI-E总线的传输效率很慢，成为瓶颈，所以在小数据时候DMA方式的读写效率也更高。
 \end{itemize}
+
+\begin{figure}[H] 
+  \centering
+  \includegraphics[width=12cm,height=8cm]{figures/chap02/cpu-gpu-memcpy-zhang}
+  \caption{内存到显存拷贝速度}
+  \label{fig:cpu-gpu-memcpy-zhang}
+\end{figure}
+
+\qquad通常来说，GPU对上面的两种方式都是支持的，而且在诸如X86平台上进行小数据的读写时候会采用第一种方式，因为DMA的方式需要一些额外的开销，更加适合大数据的传输。但是在龙芯平台上，由于PCI-E总线的传输效率很慢，成为瓶颈，所以在小数据时候DMA方式的读写效率也更高，如图\ref{fig:cpu-gpu-memcpy-zhang}。
+

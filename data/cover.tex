@@ -42,7 +42,7 @@
 \edegree{Master of Computer Architecture}
 \eauthor{Hu Qinghai}
 \edepartment{Institute of Computing Technology\\Chinese Academy of Sciences}
-\emajor{Computer Technology}
+\emajor{Computer Application Technology}
 \esupervisor{Hu Weiwu}
 
 % 这个日期也会自动生成，你要改么？
@@ -51,40 +51,34 @@
 % 定义中英文摘要和关键字
 \begin{cabstract}
 
-  OpenGL是行业领域中最为广泛接纳的2D/3D图形API, 其自诞生至今已催生了各种计算机平台及设备上的数千优秀应用程序。而随着龙芯CPU的产业化加速，基于OpenGL的图形应用程序越来越多，于是在龙芯平台上广泛使用的OpenGL的一种开源实现Mesa图形库的性能就是决定龙芯平台的客户使用体验的重中之重。本文则是针对Mesa图形库的性能优化展开的相关工作。
+  OpenGL是行业领域中最为广泛接纳的2D/3D图形API, 其自诞生至今已催生了各种计算机平台及设备上的数千优秀图形应用程序。而随着龙芯CPU的产业化加速，基于OpenGL的图形应用程序越来越多，于是在龙芯平台上广泛使用的OpenGL的一种开源实现Mesa3D图形库的性能就是决定龙芯平台的客户使用体验的重中之重。本文则是针对Mesa3D图形库的性能优化展开的相关工作。
 
-  本文完成的主要工作和贡献如下:
-
-  第一，显示列表
-
-  第二，内存到显存的优化
-
-  第三，热点代码优化
-
-  在龙芯软硬件平台上对本文提出的优化方案进行了效果验证和测试。其中显示列表优化效果...内存到显存优化效果...热点代码优化效果...。本文优化成果已经集成到龙芯Mesa图形库应用产品中。
+  本文完成的主要工作如下:
+\begin{enumerate}[1]
+\item 龙芯平台上Mesa3D图形库图形渲染硬件加速实现原理研究与分析。主要深入研究了显示列表、立即模式和顶点数组的实现机制，并且根据实现原理和性能检测寻找到龙芯平台Mesa3D图形库的性能瓶颈。
+\item 龙芯平台上Mesa3D图形库性能优化。针对龙芯平台上Mesa3D图形库的性能瓶颈,分别采用了CPU/GPU负载均衡优化、内存到显存数据传输优化和CPU端热点优化三种优化手段，并详细介绍三种优化方法的优化原理。
+\item 采用业界标准测试基准对所有优化方法进行测试优化效果。测试结果表明各种优化方法在相应应用情景中都取得一定优化效果，说明整体上达到优化目的，龙芯平台Mesa3D图形库性能得到了一定程度的提升。
+\end{enumerate}	
 
 \end{cabstract}
 
-\ckeywords{Mesa, OpenGL, MIPS, GPU, 龙芯, 性能优化}
+\ckeywords{Mesa3D, OpenGL, MIPS, GPU, 龙芯, 性能优化}
 
 \begin{eabstract} 
-   An abstract of a dissertation is a summary and extraction of research work
-   and contributions. Included in an abstract should be description of research
-   topic and research objective, brief introduction to methodology and research
-   process, and summarization of conclusion and contributions of the
-   research. An abstract should be characterized by independence and clarity and
-   carry identical information with the dissertation. It should be such that the
-   general idea and major contributions of the dissertation are conveyed without
-   reading the dissertation. 
 
-   An abstract should be concise and to the point. It is a misunderstanding to
-   make an abstract an outline of the dissertation and words ``the first
-   chapter'', ``the second chapter'' and the like should be avoided in the
-   abstract.
+OpenGL is the most widely accepted 2D/3D graphics API, it has spawned thousands of outstanding graphics applications on a variety of computer platforms and devices. With the acceleration of the industrialization of Loongson CPU, there are more and more graphics applications based on OpenGL. So the performance of Mesa3D graphics library, an opensoure implementation of OpenGL on Loongson platform, determine the customer experience of Loongson products. This paper is aimed at the performance optimization of the Mesa3D graphics library.
 
-   Key words are terms used in a dissertation for indexing, reflecting core
-   information of the dissertation. An abstract may contain a maximum of 5 key
-   words, with semi-colons used in between to separate one another.
+The main work of this paper is as follows:
+
+\begin{enumerate}[1]
+\item Research and analysis on the graphics rendering pipeline of Mesa3D graphics library using hardware acceleration on the Loongson platform. Deeper analysis of the implementation principle of display list, immediate mode and vertex array. And find the performance bottleneck of Mesa3D on Loongson platform by the performance testing.
+
+\item Performance optimization of Mesa3D graphics library on Loongson platform. According to the performance bottleneck of Mesa3D graphics library on Loongson platform, this paper propose three methods of optimization: CPU/GPU load balanced optimization, optimization of system memory to vedio memory data transmission and CPU hot optimization. Then the optimization principle of the three optimization methods are introduced in detail.
+
+\item Use industry standard test benchmark to test the effectiveness of the all the optimization methods. Test results show that all kinds of optimization methods in the corresponding application scenarios have achieved a satisfactory optimal result, which shows that the performance of the Mesa3D graphics library on Loongson platform has been improved.
+
+\end{enumerate}
+
 \end{eabstract}
 
-\ekeywords{Mesa, OpenGL, MIPS, GPU, Loongson, Performance Optimization}
+\ekeywords{Mesa3D, OpenGL, MIPS, GPU, Loongson, Performance Optimization}
